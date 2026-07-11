@@ -113,8 +113,7 @@
   .upload-label{display:block;font-size:13px;color:var(--text-2);margin-bottom:8px;}
   .upload-btn{
     display:inline-block;background:var(--card);border:1px dashed var(--line-strong);
-    border-radius:5px;padding:9px 166px;font-size:12.5px;color:var(--amber);cursor:pointer;
-    text-align: center; width: 100%;
+    border-radius:5px;padding:9px 16px;font-size:12.5px;color:var(--amber);cursor:pointer;
   }
   .upload-btn:hover{border-color:var(--amber);}
   .thumb-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;}
@@ -355,6 +354,7 @@
       <div class="output-box" id="output">ገና ምንም ሪፖርት አልተፈጠረም። ከላይ "ሪፖርት አመንጭ" የሚለውን ይጫኑ።</div>
       <div id="view-gallery"></div>
       <div class="copy-msg" id="copy-msg">✅ ጽሁፉ ተኮፒ ተደርጓል!</div>
+      <div class="copy-msg" id="save-msg">✅ ሪፖርት ተቀምጦ ወደ አድሚን ተልኳል!</div>
       <div class="form-actions">
         <button type="button" class="ghost" id="btn-copy">ጽሁፉን ኮፒ አድርግ</button>
         <button type="button" class="primary" id="btn-save">ሪፖርት አስቀምጥ</button>
@@ -399,6 +399,23 @@
 const USERS_KEY = 'halal-users-v1';
 const REPORTS_KEY = 'halal-daily-reports-v2';
 const ADMIN_SECRET = 'FUAD-ADMIN-2026';
+
+// ---- Telegram notification (sends a message to admin when a report is saved) ----
+const TELEGRAM_BOT_TOKEN = '8816155815:AAGaxgc9bhIGjqLAxNTMvvFZq7StXRZ6Pus';
+const TELEGRAM_CHAT_ID = '6449171736';
+
+async function sendTelegramNotification(text){
+  if(!TELEGRAM_BOT_TOKEN || !TELEGRAM_CHAT_ID) return;
+  try{
+    await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ chat_id: TELEGRAM_CHAT_ID, text: text })
+    });
+  }catch(e){
+    console.error('Telegram notification error', e);
+  }
+}
 const DAYS_AM = ['እሁድ','ሰኞ','ማክሰኞ','ረቡዕ','ሐሙስ','አርብ','ቅዳሜ'];
 
 let users = [];
@@ -505,7 +522,7 @@ if(document.getElementById('f-warranty-file')){
 async function saveReportImages(reportId){
   if(warrantyImages.length === 0 && receiptImages.length === 0) return;
   try{
-    localStorage.setItem('report-images:' + reportId, JSON.stringify({warrantyImages, receiptImages}));
+    await window.storage.set('report-images:' + reportId, JSON.stringify({warrantyImages, receiptImages}), true);
   }catch(e){
     console.error('Image storage error', e);
   }
@@ -513,36 +530,36 @@ async function saveReportImages(reportId){
 
 async function loadReportImages(reportId){
   try{
-    const res = localStorage.getItem('report-images:' + reportId);
-    return res ? JSON.parse(res) : null;
+    const res = await window.storage.get('report-images:' + reportId, true);
+    return res && res.value ? JSON.parse(res.value) : null;
   }catch(e){
     return null;
   }
 }
 
 async function deleteReportImages(reportId){
-  try{ localStorage.removeItem('report-images:' + reportId); }
+  try{ await window.storage.delete('report-images:' + reportId, true); }
   catch(e){ /* key may not exist, ignore */ }
 }
 
 async function loadUsers(){
   try{
-    const res = localStorage.getItem(USERS_KEY);
-    users = res ? JSON.parse(res) : [];
+    const res = await window.storage.get(USERS_KEY, true);
+    users = res && res.value ? JSON.parse(res.value) : [];
   }catch(e){ users = []; }
 }
 async function saveUsers(){
-  try{ localStorage.setItem(USERS_KEY, JSON.stringify(users)); }
+  try{ await window.storage.set(USERS_KEY, JSON.stringify(users), true); }
   catch(e){ console.error('Storage error', e); }
 }
 async function loadReports(){
   try{
-    const res = localStorage.getItem(REPORTS_KEY);
-    reports = res ? JSON.parse(res) : [];
+    const res = await window.storage.get(REPORTS_KEY, true);
+    reports = res && res.value ? JSON.parse(res.value) : [];
   }catch(e){ reports = []; }
 }
 async function saveReports(){
-  try{ localStorage.setItem(REPORTS_KEY, JSON.stringify(reports)); }
+  try{ await window.storage.set(REPORTS_KEY, JSON.stringify(reports), true); }
   catch(e){ console.error('Storage error', e); }
 }
 
@@ -936,7 +953,7 @@ function renderHistory(){
   `).join('');
 }
 
-document.getElementById('btn-save').addEventListener('click', async () => {
+document.getElementById('btn-save').addEventListener('click', async ()=>{
   const text = buildReportText();
   const reportId = Date.now().toString();
   const entry = {
@@ -956,6 +973,9 @@ document.getElementById('btn-save').addEventListener('click', async () => {
   await saveReportImages(reportId);
   reports.push(entry);
   await saveReports();
+  await sendTelegramNotification(text);
+  const saveMsg = document.getElementById('save-msg');
+  if(saveMsg){ saveMsg.style.display='block'; setTimeout(()=>{saveMsg.style.display='none';}, 3000); }
   if(currentUser.isAdmin){ populateWorkerFilter(); renderDashboard(); }
   renderHistory();
 });
@@ -999,11 +1019,10 @@ window.deleteHistory = async function(id){
   renderHistory();
 };
 
-async function init(){
+(async function init(){
   await loadUsers();
   await loadReports();
-}
-init();
+})();
 </script>
 </body>
 </html>
