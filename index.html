@@ -118,12 +118,24 @@
   .day-header .line{flex:1;height:1px;background:var(--line-strong);}
   .day-header .today-tag{background:var(--blue-dim);color:var(--blue);padding:2px 8px;border-radius:20px;font-size:10px;}
 
+  .month-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin-top:12px;}
+  .month-cell{display:flex;flex-direction:column;gap:3px;}
+  .month-cell label{font-size:9.5px;color:var(--text-3);text-align:center;}
+  .month-cell input{padding:5px 4px;font-size:11.5px;text-align:center;}
+  .past-months-toggle{font-size:11.5px;color:var(--blue);cursor:pointer;margin-top:10px;display:inline-block;}
+  .past-month-row{display:flex;justify-content:space-between;font-size:12px;color:var(--text-2);padding:6px 0;border-bottom:1px solid var(--line);}
+
   .auth-tabs{display:flex;gap:8px;margin-bottom:16px;}
   .auth-tab{flex:1;text-align:center;padding:10px;border-radius:5px;border:1px solid var(--line-strong);cursor:pointer;font-size:13px;color:var(--text-2);}
   .auth-tab.active{background:var(--blue-dim);color:var(--blue);border-color:var(--blue);}
   .error-msg{color:var(--red);font-size:12.5px;margin-top:10px;display:none;}
   .hint{font-size:11.5px;color:var(--text-3);margin-top:4px;}
   .notice{background:var(--card);border:1px solid var(--line-strong);border-radius:5px;padding:12px 14px;font-size:12px;color:var(--text-2);}
+
+  .grid-in{width:64px;padding:5px 6px;font-size:12px;background:var(--card);border:1px solid var(--line-strong);border-radius:4px;color:var(--text);font-family:'JetBrains Mono',monospace;}
+  #grid-table td{padding:4px;white-space:nowrap;}
+  #grid-table tr:nth-child(even){background:rgba(255,255,255,0.02);}
+  .grid-day-today{color:var(--blue);font-weight:700;}
 
   @media(max-width:640px){
     .grid2, .grid3, .contract-grid{grid-template-columns:1fr;}
@@ -297,32 +309,26 @@
       </div>
     </div>
 
-    <div class="section-title"><span class="num">07</span> 3️⃣ ኮንትራት ደንበኞች</div>
-    <div class="card">
-      <div class="grid3">
-        <div class="field">
-          <label>ስም</label>
-          <input type="text" id="c-name" placeholder="የደንበኛ ስም">
+    <div id="contracts-section" class="hidden">
+      <div class="section-title"><span class="num">07</span> 3️⃣ ኮንትራት ደንበኞች (አድሚን ብቻ)</div>
+      <div class="card">
+        <div class="grid2">
+          <div class="field">
+            <label>ስም</label>
+            <input type="text" id="c-name" placeholder="የደንበኛ ስም">
+          </div>
+          <div class="field">
+            <label>ዋጋ በሊትር (ብር)</label>
+            <input type="number" id="c-price" class="mono" min="0" value="160">
+          </div>
         </div>
-        <div class="field">
-          <label>ዕለታዊ ሊትር</label>
-          <input type="number" id="c-liters" class="mono" min="0" step="0.5" placeholder="0">
+        <div class="form-actions">
+          <button type="button" class="primary" id="btn-add-contract">ኮንትራት ደንበኛ ጨምር</button>
         </div>
-        <div class="field">
-          <label>ዋጋ በሊትር (ብር)</label>
-          <input type="number" id="c-price" class="mono" min="0" value="160">
-        </div>
+        <div class="hint">ከተመዘገበ በኋላ ከታች ባለው ሠንጠረዥ ውስጥ ከቀን 1 እስከ 30 (የኢትዮጵያ ወር) ዕለታዊ ሊትር በተናጠል ያስገቡ። ወሩ ሲሞላ (30 ቀን) ራሱ ተቀምጦ ይቀራል፣ አዲስ ወር በራሱ ይጀምራል።</div>
       </div>
-      <div class="field">
-        <label>የመጀመሪያ ቀን</label>
-        <input type="date" id="c-start-date" class="mono">
-      </div>
-      <div class="form-actions">
-        <button type="button" class="primary" id="btn-add-contract">ኮንትራት ደንበኛ ጨምር</button>
-      </div>
-      <div class="hint">አንዴ ከተመዘገበ በኋላ በየቀኑ ራሱ ይሰላል — ደግመው ማስገባት አያስፈልግም። ደንበኛው ገንዘብ ሲከፍል ከታች ባለው ዝርዝር ውስጥ "ክፍያ መዝግብ" ይጫኑ።</div>
+      <div id="contracts-list" style="margin-top:14px;"></div>
     </div>
-    <div id="contracts-list" style="margin-top:14px;"></div>
 
     <div id="admin-section" class="hidden">
       <div class="section-title"><span class="num">08</span> 🗂️ የስራ አስኪያጅ ማጠቃለያ (እውነተኛ-ጊዜ)</div>
@@ -335,13 +341,50 @@
         </div>
       </div>
 
-      <div class="section-title"><span class="num">09</span> 👥 የተጠቃሚዎች አስተዳደር</div>
+      <div class="section-title"><span class="num">09</span> 📊 ወርሃዊ ሠንጠረዥ (1-30፣ ኢትዮጵያ አቆጣጠር) — አድሚን ብቻ</div>
+      <div class="card" style="overflow-x:auto;">
+        <div class="grid-nav" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
+          <button type="button" class="ghost small" id="btn-grid-prev">◀ ቀዳሚ ወር</button>
+          <div id="grid-month-label" style="font-family:'JetBrains Mono',monospace;font-size:14px;color:var(--blue);"></div>
+          <button type="button" class="ghost small" id="btn-grid-next">ቀጣይ ወር ▶</button>
+        </div>
+        <table style="width:100%;border-collapse:collapse;font-size:12px;" id="grid-table">
+          <thead>
+            <tr style="color:var(--text-2);text-align:left;border-bottom:1px solid var(--line-strong);">
+              <th style="padding:6px 4px;">ቀን</th>
+              <th style="padding:6px 4px;">ጠዋት ሊ</th>
+              <th style="padding:6px 4px;">ማታ ሊ</th>
+              <th style="padding:6px 4px;">ድምር</th>
+              <th style="padding:6px 4px;">ኮንትራት ሊ</th>
+              <th style="padding:6px 4px;">ችርቻሮ ገቢ</th>
+              <th style="padding:6px 4px;">ወጪ</th>
+              <th style="padding:6px 4px;">ትርፍ</th>
+            </tr>
+          </thead>
+          <tbody id="grid-body"></tbody>
+          <tfoot>
+            <tr style="border-top:1px solid var(--line-strong);font-weight:700;color:var(--blue);">
+              <td style="padding:8px 4px;">ድምር</td>
+              <td style="padding:8px 4px;" id="gt-morning">0</td>
+              <td style="padding:8px 4px;" id="gt-evening">0</td>
+              <td style="padding:8px 4px;" id="gt-total">0</td>
+              <td style="padding:8px 4px;" id="gt-contract">0</td>
+              <td style="padding:8px 4px;" id="gt-retail">0</td>
+              <td style="padding:8px 4px;" id="gt-expense">0</td>
+              <td style="padding:8px 4px;" id="gt-profit">0</td>
+            </tr>
+          </tfoot>
+        </table>
+        <div class="hint" style="margin-top:10px;">ወር ሲያልቅ (ኢትዮጵያ አቆጣጠር 30) ራሱ ይቀመጣል፣ ሲቀጥለው ወር ላይ አዲስ ባዶ ሠንጠረዥ በራሱ ይጀምራል። ቀዳሚ ወራትን ለማየት "ቀዳሚ ወር" ይጫኑ።</div>
+      </div>
+
+      <div class="section-title"><span class="num">10</span> 👥 የተጠቃሚዎች አስተዳደር</div>
       <div class="card">
         <div class="history" id="users-list"></div>
       </div>
     </div>
 
-    <div class="section-title"><span class="num">10</span> <span id="history-title">የኔ ያለፉ ሪፖርቶች</span></div>
+    <div class="section-title"><span class="num">11</span> <span id="history-title">የኔ ያለፉ ሪፖርቶች</span></div>
     <div class="history" id="history"></div>
 
   </div>
@@ -377,11 +420,13 @@ let currentUser = null; // {name, phone, isAdmin}
 let allReports = [];
 let allUsers = [];
 let allContracts = [];
+let allContractMonths = [];
 let allPayments = [];
 let pendingReg = null;
 let lastSavedText = null;
 let isSaving = false;
-let reportsUnsub=null, usersUnsub=null, contractsUnsub=null, paymentsUnsub=null;
+let reportsUnsub=null, usersUnsub=null, contractsUnsub=null, contractMonthsUnsub=null, paymentsUnsub=null, gridUnsub=null;
+let gridEthYear=null, gridEthMonth=null, gridData={};
 
 // ---- helpers ----
 async function sha256(text){
@@ -420,13 +465,44 @@ function jdnToEthiopian(jdn){
   const day = (n % 30) + 1;
   return { year, month, day };
 }
-function toEthiopianDate(isoDateStr){
-  if(!isoDateStr) return '';
+function getEthParts(isoDateStr){
   const [y,m,d] = isoDateStr.split('-').map(Number);
   const jdn = gregorianToJDN(y, m, d);
-  const eth = jdnToEthiopian(jdn);
+  return jdnToEthiopian(jdn);
+}
+function toEthiopianDate(isoDateStr){
+  if(!isoDateStr) return '';
+  const eth = getEthParts(isoDateStr);
   const monthName = ETH_MONTHS[eth.month - 1] || '';
   return `${eth.day} ${monthName} ${eth.year} ዓ.ም`;
+}
+function currentEthYearMonth(){
+  const eth = getEthParts(todayISO());
+  return { year: eth.year, month: eth.month };
+}
+// Ethiopian -> JDN -> Gregorian (reverse conversion, for the monthly grid)
+function ethiopianToJDN(ethYear, ethMonth, ethDay){
+  return 1723856 + 365 * (ethYear - 1) + Math.floor(ethYear / 4) + 30 * (ethMonth - 1) + (ethDay - 1);
+}
+function jdnToGregorian(jdn){
+  const a = jdn + 32044;
+  const b = Math.floor((4 * a + 3) / 146097);
+  const c = a - Math.floor((146097 * b) / 4);
+  const d = Math.floor((4 * c + 3) / 1461);
+  const e = c - Math.floor((1461 * d) / 4);
+  const m = Math.floor((5 * e + 2) / 153);
+  const day = e - Math.floor((153 * m + 2) / 5) + 1;
+  const month = m + 3 - 12 * Math.floor(m / 10);
+  const year = 100 * b + d - 4800 + Math.floor(m / 10);
+  return { year, month, day };
+}
+function ethiopianToGregorianISO(ethYear, ethMonth, ethDay){
+  const jdn = ethiopianToJDN(ethYear, ethMonth, ethDay);
+  const g = jdnToGregorian(jdn);
+  return `${g.year}-${String(g.month).padStart(2,'0')}-${String(g.day).padStart(2,'0')}`;
+}
+function monthKey(contractId, ethYear, ethMonth){
+  return `${contractId}_${ethYear}_${ethMonth}`;
 }
 function toEthiopianTime(date){
   let h = date.getHours();
@@ -551,8 +627,8 @@ document.getElementById('btn-reg-verify').addEventListener('click', async ()=>{
 
 document.getElementById('btn-logout').addEventListener('click', ()=>{
   currentUser = null;
-  [reportsUnsub,usersUnsub,contractsUnsub,paymentsUnsub].forEach(u=>{ if(u) u(); });
-  reportsUnsub=usersUnsub=contractsUnsub=paymentsUnsub=null;
+  [reportsUnsub,usersUnsub,contractsUnsub,contractMonthsUnsub,paymentsUnsub,gridUnsub].forEach(u=>{ if(u) u(); });
+  reportsUnsub=usersUnsub=contractsUnsub=contractMonthsUnsub=paymentsUnsub=gridUnsub=null;
   document.getElementById('app-screen').classList.add('hidden');
   document.getElementById('auth-screen').classList.remove('hidden');
   document.getElementById('login-phone').value=''; document.getElementById('login-pass').value='';
@@ -565,10 +641,10 @@ function enterApp(){
   document.getElementById('who-badge').innerHTML = currentUser.isAdmin
     ? '<span class="badge-admin">አድሚን</span>' : '<span class="badge-worker">ሠራተኛ</span>';
   document.getElementById('admin-section').classList.toggle('hidden', !currentUser.isAdmin);
+  document.getElementById('contracts-section').classList.toggle('hidden', !currentUser.isAdmin);
   document.getElementById('history-title').textContent = currentUser.isAdmin ? 'ሁሉም ሪፖርቶች' : 'የኔ ያለፉ ሪፖርቶች';
 
   document.getElementById('f-date').value = todayISO();
-  document.getElementById('c-start-date').value = todayISO();
   updateDayName();
   renderExpenseRows();
   updateAll();
@@ -578,19 +654,29 @@ function enterApp(){
     if(currentUser.isAdmin) renderDashboard();
     renderHistory();
   });
+  // Everyone needs contracts + current-month data to compute the daily auto-deduction,
+  // even though only admin can edit/see the management UI.
   contractsUnsub = onSnapshot(query(collection(db,'milk_contracts')), (snap)=>{
     allContracts = []; snap.forEach(d=> allContracts.push({id:d.id, ...d.data()}));
-    renderContracts(); updateAll();
+    if(currentUser.isAdmin) renderContracts();
+    updateAll();
+  });
+  contractMonthsUnsub = onSnapshot(query(collection(db,'milk_contract_months')), (snap)=>{
+    allContractMonths = []; snap.forEach(d=> allContractMonths.push({id:d.id, ...d.data()}));
+    if(currentUser.isAdmin) renderContracts();
+    updateAll();
   });
   paymentsUnsub = onSnapshot(query(collection(db,'milk_payments')), (snap)=>{
     allPayments = []; snap.forEach(d=> allPayments.push({id:d.id, ...d.data()}));
-    renderContracts();
+    if(currentUser.isAdmin) renderContracts();
   });
   if(currentUser.isAdmin){
     usersUnsub = onSnapshot(query(collection(db,'milk_users')), (snap)=>{
       allUsers = []; snap.forEach(d=> allUsers.push({id:d.id, ...d.data()}));
       renderUsersList();
     });
+    const nowEth = currentEthYearMonth();
+    loadGridMonth(nowEth.year, nowEth.month);
   }
 }
 
@@ -917,6 +1003,103 @@ document.getElementById('contracts-list').addEventListener('click', async (e)=>{
     if(!confirm(`"${delBtn.dataset.cname}" የተባለውን ኮንትራት ሙሉ በሙሉ መሰረዝ ይፈልጋሉ? ይህ ተመልሶ አይመጣም።`)) return;
     try{ await deleteDoc(doc(db,'milk_contracts',delBtn.dataset.delcontract)); }catch(err){ console.error(err); }
   }
+});
+
+// ---- Monthly grid (admin only): 1-30 Ethiopian days, editable ----
+function gridDocId(ethYear, ethMonth){ return `${ethYear}-${ethMonth}`; }
+
+function loadGridMonth(ethYear, ethMonth){
+  if(gridUnsub){ gridUnsub(); gridUnsub = null; }
+  gridEthYear = ethYear; gridEthMonth = ethMonth;
+  const ref = doc(db,'milk_monthly', gridDocId(ethYear, ethMonth));
+  gridUnsub = onSnapshot(ref, (snap)=>{
+    gridData = snap.exists() ? (snap.data().days || {}) : {};
+    renderGrid();
+  });
+}
+
+function daysInEthMonth(ethMonth, ethYear){
+  if(ethMonth < 13) return 30;
+  // Pagumen: 6 days in a leap year, else 5. Ethiopian leap year: (year+1) % 4 === 0
+  return ((ethYear + 1) % 4 === 0) ? 6 : 5;
+}
+
+function renderGrid(){
+  if(!gridEthYear) return;
+  const monthName = ETH_MONTHS[gridEthMonth-1] || '';
+  document.getElementById('grid-month-label').textContent = `${monthName} ${gridEthYear} ዓ.ም`;
+  const totalDays = daysInEthMonth(gridEthMonth, gridEthYear);
+  const todayEth = getEthParts(todayISO());
+  const isCurrentMonth = (todayEth.year===gridEthYear && todayEth.month===gridEthMonth);
+
+  let sumMorning=0,sumEvening=0,sumTotal=0,sumContract=0,sumRetail=0,sumExpense=0,sumProfit=0;
+  const rows = [];
+  for(let d=1; d<=totalDays; d++){
+    const gregISO = ethiopianToGregorianISO(gridEthYear, gridEthMonth, d);
+    const row = gridData[String(d)] || {};
+    const morning = Number(row.morning)||0;
+    const evening = Number(row.evening)||0;
+    const total = morning + evening;
+    const contractLiters = contractLitersForDate(gregISO);
+    const contractIncome = contractIncomeForDate(gregISO);
+    const retailIncome = Number(row.retailIncome)||0;
+    const expense = Number(row.expense)||0;
+    const profit = contractIncome + retailIncome - expense;
+    sumMorning+=morning; sumEvening+=evening; sumTotal+=total; sumContract+=contractLiters;
+    sumRetail+=retailIncome; sumExpense+=expense; sumProfit+=profit;
+    const dayLabel = isCurrentMonth && d===todayEth.day ? `<span class="grid-day-today">${d}</span>` : d;
+    rows.push(`
+      <tr data-day="${d}">
+        <td class="mono">${dayLabel}</td>
+        <td><input type="number" class="grid-in gin-morning" min="0" step="0.5" value="${morning||''}" placeholder="0"></td>
+        <td><input type="number" class="grid-in gin-evening" min="0" step="0.5" value="${evening||''}" placeholder="0"></td>
+        <td class="mono">${round(total)}</td>
+        <td class="mono">${round(contractLiters)}</td>
+        <td><input type="number" class="grid-in gin-retail" min="0" value="${retailIncome||''}" placeholder="0"></td>
+        <td><input type="number" class="grid-in gin-expense" min="0" value="${expense||''}" placeholder="0"></td>
+        <td class="mono" style="color:${profit>=0?'var(--green)':'var(--red)'};">${money(profit)}</td>
+      </tr>
+    `);
+  }
+  document.getElementById('grid-body').innerHTML = rows.join('');
+  document.getElementById('gt-morning').textContent = round(sumMorning);
+  document.getElementById('gt-evening').textContent = round(sumEvening);
+  document.getElementById('gt-total').textContent = round(sumTotal);
+  document.getElementById('gt-contract').textContent = round(sumContract);
+  document.getElementById('gt-retail').textContent = money(sumRetail);
+  document.getElementById('gt-expense').textContent = money(sumExpense);
+  document.getElementById('gt-profit').textContent = money(sumProfit);
+}
+
+async function saveGridRow(dayEl){
+  const day = dayEl.dataset.day;
+  const rowData = {
+    morning: Number(dayEl.querySelector('.gin-morning').value)||0,
+    evening: Number(dayEl.querySelector('.gin-evening').value)||0,
+    retailIncome: Number(dayEl.querySelector('.gin-retail').value)||0,
+    expense: Number(dayEl.querySelector('.gin-expense').value)||0
+  };
+  try{
+    await setDoc(doc(db,'milk_monthly', gridDocId(gridEthYear, gridEthMonth)),
+      { [`days.${day}`]: rowData, ethYear: gridEthYear, ethMonth: gridEthMonth, updatedAt: Date.now() },
+      { merge: true });
+  }catch(e){ console.error('Grid save error', e); }
+}
+document.getElementById('grid-body').addEventListener('focusout', (e)=>{
+  if(e.target.matches('.grid-in')){
+    saveGridRow(e.target.closest('tr'));
+  }
+});
+
+document.getElementById('btn-grid-prev').addEventListener('click', ()=>{
+  let m = gridEthMonth - 1, y = gridEthYear;
+  if(m < 1){ m = 13; y -= 1; }
+  loadGridMonth(y, m);
+});
+document.getElementById('btn-grid-next').addEventListener('click', ()=>{
+  let m = gridEthMonth + 1, y = gridEthYear;
+  if(m > 13){ m = 1; y += 1; }
+  loadGridMonth(y, m);
 });
 
 // ---- Admin dashboard ----
