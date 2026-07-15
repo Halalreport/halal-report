@@ -16,7 +16,7 @@
     --red:#E4572E; --red-dim:#3A2018;
     --text:#ECEFF1; --text-2:#93A5AD; --text-3:#5E6E75;
     --line:#243138; --line-strong:#324349;
-    --hero-bg:#F4F7FB; --hero-card:#FFFFFF; --hero-blue:#3B6FE0; --hero-text:#2A3342; --hero-text-2:#6B7684;
+    --hero-bg:#12171A; --hero-card:#1D2529; --hero-blue:#3FAE7A; --hero-text:#ECEFF1; --hero-text-2:#93A5AD;
   }
   *{box-sizing:border-box;}
   body{margin:0;background:var(--bg);color:var(--text);font-family:'Noto Sans Ethiopic',sans-serif;line-height:1.6;}
@@ -30,12 +30,12 @@
   .hero p{margin:10px 0 0;font-size:13.5px;color:var(--hero-text-2);text-align:center;max-width:480px;margin-left:auto;margin-right:auto;}
   .dept-cards{display:flex;gap:14px;margin-top:26px;flex-wrap:wrap;justify-content:center;}
   .dept-card{
-    flex:1;min-width:140px;max-width:200px;background:var(--hero-card);border:1px solid #E4E9F0;border-radius:12px;
+    flex:1;min-width:140px;max-width:200px;background:var(--hero-card);border:1px solid var(--line-strong);border-radius:12px;
     padding:20px 14px;text-align:center;cursor:pointer;transition:transform .12s, box-shadow .12s;
-    box-shadow:0 2px 6px rgba(30,50,90,0.05);
+    box-shadow:0 2px 6px rgba(0,0,0,0.2);
   }
-  .dept-card:hover{transform:translateY(-2px);box-shadow:0 6px 16px rgba(30,50,90,0.1);}
-  .dept-card.active{border-color:var(--hero-blue);box-shadow:0 6px 16px rgba(59,111,224,0.18);}
+  .dept-card:hover{transform:translateY(-2px);box-shadow:0 6px 16px rgba(0,0,0,0.35);}
+  .dept-card.active{border-color:var(--hero-blue);box-shadow:0 6px 16px rgba(63,174,122,0.25);}
   .dept-card .ic{font-size:26px;margin-bottom:8px;}
   .dept-card .lbl{font-size:13.5px;color:var(--hero-text);font-weight:600;line-height:1.3;}
   .hero-underline{width:70px;height:3px;background:var(--hero-blue);border-radius:3px;margin:22px auto 0;}
@@ -86,8 +86,8 @@
   .lock-box input{max-width:260px;margin:0 auto 12px;text-align:center;}
   .error-msg{color:var(--red);font-size:12.5px;margin-top:10px;display:none;}
 
-  .dept-tabs{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;}
-  .dept-tab{flex:1;min-width:140px;text-align:center;padding:10px;border-radius:5px;border:1px solid var(--line-strong);cursor:pointer;font-size:12.5px;color:var(--text-2);}
+  .dept-tabs{display:flex;gap:6px;margin-bottom:16px;flex-wrap:nowrap;}
+  .dept-tab{flex:1;min-width:0;text-align:center;padding:9px 4px;border-radius:5px;border:1px solid var(--line-strong);cursor:pointer;font-size:11.5px;color:var(--text-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .dept-tab.active{background:var(--teal-dim);color:var(--teal);border-color:var(--teal);}
 
   .job-add-row{display:flex;gap:8px;align-items:flex-end;}
@@ -200,6 +200,11 @@
 
     <!-- ADMIN AREA -->
     <div id="admin-area" class="hidden">
+
+      <div class="session-bar" style="display:flex;justify-content:space-between;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:10px 16px;margin-bottom:6px;">
+        <span style="font-size:12.5px;color:var(--teal);">🔓 አድሚን ገብተዋል</span>
+        <button type="button" class="ghost small" id="btn-admin-logout">ውጣ</button>
+      </div>
 
       <div class="section-title"><span class="num">01</span> ዕለታዊ ቁጥር ማስገቢያ (አድሚን ብቻ)</div>
       <div class="card">
@@ -379,7 +384,7 @@
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
 import {
-  getFirestore, collection, addDoc, deleteDoc, doc, onSnapshot, query
+  getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot, query
 } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -405,6 +410,7 @@ let socialEntries = [];
 let adminUnlocked = false;
 let activeHistTab = 'labor';
 let jobTallyDraft = {}; // {jobType: count} for the social form draft
+let editState = { dept: null, id: null };
 
 function todayISO(){ return new Date().toISOString().slice(0,10); }
 function escapeAttr(str){ const d=document.createElement('div'); d.textContent=str||''; return d.innerHTML; }
@@ -478,6 +484,13 @@ document.getElementById('btn-unlock').addEventListener('click', ()=>{
   }else{
     err.textContent = 'የተሳሳተ ኮድ'; err.style.display='block';
   }
+});
+document.getElementById('btn-admin-logout').addEventListener('click', ()=>{
+  adminUnlocked = false;
+  document.getElementById('admin-area').classList.add('hidden');
+  document.getElementById('lock-screen').classList.remove('hidden');
+  document.getElementById('admin-pass').value = '';
+  cancelEdit();
 });
 document.getElementById('admin-pass').addEventListener('keydown', (e)=>{
   if(e.key === 'Enter') document.getElementById('btn-unlock').click();
@@ -572,12 +585,19 @@ document.getElementById('btn-save-labor').addEventListener('click', async ()=>{
     createdAt: Date.now()
   };
   if(rec.unempMale===0 && rec.unempFemale===0 && !rec.notes){ showToast('እባክዎ ቢያንስ አንድ ቁጥር ያስገቡ'); return; }
+  const isEditing = editState.dept === 'labor' && editState.id;
   try{
-    await addDoc(collection(db,'labor_tally'), rec);
-    await sendTelegram(`💼 ስራና ክህሎት — ዕለታዊ ቆጠራ\n👤 ሰብሳቢ: ${rec.collectorName||'—'}\n📅 ${rec.ethDate} (${rec.date})\nስራ አጥ ወንድ: ${rec.unempMale}\nስራ አጥ ሴት: ${rec.unempFemale}${rec.notes ? '\n📝 '+rec.notes : ''}`);
-    showToast('ተመዝግቧል');
-    document.getElementById('l-unemp-m').value=''; document.getElementById('l-unemp-f').value=''; document.getElementById('l-notes').value='';
+    if(isEditing){
+      await updateDoc(doc(db,'labor_tally', editState.id), rec);
+      showToast('ተዘምኗል');
+    }else{
+      await addDoc(collection(db,'labor_tally'), rec);
+      await sendTelegram(`💼 ስራና ክህሎት — ዕለታዊ ቆጠራ\n👤 ሰብሳቢ: ${rec.collectorName||'—'}\n📅 ${rec.ethDate} (${rec.date})\nስራ አጥ ወንድ: ${rec.unempMale}\nስራ አጥ ሴት: ${rec.unempFemale}${rec.notes ? '\n📝 '+rec.notes : ''}`);
+      showToast('ተመዝግቧል');
+    }
+    document.getElementById('l-unemp-m').value=''; document.getElementById('l-unemp-f').value=''; document.getElementById('l-notes').value=''; document.getElementById('l-collector').value='';
     document.getElementById('l-date').value = todayISO();
+    if(isEditing) cancelEdit();
   }catch(e){ console.error(e); showToast('ስህተት ተፈጥሯል፣ Firestore ያረጋግጡ'); }
 });
 
@@ -595,13 +615,21 @@ document.getElementById('btn-save-insurance').addEventListener('click', async ()
     createdAt: Date.now()
   };
   if(!rec.newMale && !rec.newFemale && !rec.renewMale && !rec.renewFemale && !rec.notes){ showToast('እባክዎ ቢያንስ አንድ ቁጥር ያስገቡ'); return; }
+  const isEditing = editState.dept === 'insurance' && editState.id;
   try{
-    await addDoc(collection(db,'insurance_tally'), rec);
-    await sendTelegram(`🏥 ጤና መድን — ዕለታዊ ቆጠራ\n👤 ሰብሳቢ: ${rec.collectorName||'—'}\n📅 ${rec.ethDate} (${rec.date})\nአዲስ ያወጡ ወ: ${rec.newMale} ሴ: ${rec.newFemale}\nያደሱ ወ: ${rec.renewMale} ሴ: ${rec.renewFemale}${rec.notes ? '\n📝 '+rec.notes : ''}`);
-    showToast('ተመዝግቧል');
+    if(isEditing){
+      await updateDoc(doc(db,'insurance_tally', editState.id), rec);
+      showToast('ተዘምኗል');
+    }else{
+      await addDoc(collection(db,'insurance_tally'), rec);
+      await sendTelegram(`🏥 ጤና መድን — ዕለታዊ ቆጠራ\n👤 ሰብሳቢ: ${rec.collectorName||'—'}\n📅 ${rec.ethDate} (${rec.date})\nአዲስ ያወጡ ወ: ${rec.newMale} ሴ: ${rec.newFemale}\nያደሱ ወ: ${rec.renewMale} ሴ: ${rec.renewFemale}${rec.notes ? '\n📝 '+rec.notes : ''}`);
+      showToast('ተመዝግቧል');
+    }
     ['i-new-m','i-new-f','i-renew-m','i-renew-f'].forEach(id=> document.getElementById(id).value='');
+    document.getElementById('i-collector').value='';
     document.getElementById('i-notes').value='';
     document.getElementById('i-date').value = todayISO();
+    if(isEditing) cancelEdit();
   }catch(e){ console.error(e); showToast('ስህተት ተፈጥሯል፣ Firestore ያረጋግጡ'); }
 });
 
@@ -651,16 +679,24 @@ document.getElementById('btn-save-social').addEventListener('click', async ()=>{
   };
   const hasAny = rec.elderly||rec.disabled||rec.women||rec.children||Object.keys(jobTallyDraft).length||rec.incomeLow||rec.incomeMid||rec.incomeHigh;
   if(!hasAny && !rec.notes){ showToast('እባክዎ ቢያንስ አንድ ቁጥር ያስገቡ'); return; }
+  const isEditing = editState.dept === 'social' && editState.id;
   try{
-    await addDoc(collection(db,'social_tally'), rec);
-    const jobText = Object.keys(jobTallyDraft).length ? '\n💼 ' + Object.entries(jobTallyDraft).map(([k,v])=>`${k}:${v}`).join(', ') : '';
-    await sendTelegram(`👥 ሴቶችና ማህበራዊ ጉዳይ — ዕለታዊ ቆጠራ\n👤 ሰብሳቢ: ${rec.collectorName||'—'}\n📅 ${rec.ethDate} (${rec.date})\nአረጋውያን: ${rec.elderly} · አካል ጉዳተኞች: ${rec.disabled} · ሴቶች: ${rec.women} · ህጻናት: ${rec.children}\nገቢ — ዝቅተኛ:${rec.incomeLow} መካከለኛ:${rec.incomeMid} ከፍተኛ:${rec.incomeHigh}${jobText}${rec.notes ? '\n📝 '+rec.notes : ''}`);
-    showToast('ተመዝግቧል');
+    if(isEditing){
+      await updateDoc(doc(db,'social_tally', editState.id), rec);
+      showToast('ተዘምኗል');
+    }else{
+      await addDoc(collection(db,'social_tally'), rec);
+      const jobText = Object.keys(jobTallyDraft).length ? '\n💼 ' + Object.entries(jobTallyDraft).map(([k,v])=>`${k}:${v}`).join(', ') : '';
+      await sendTelegram(`👥 ሴቶችና ማህበራዊ ጉዳይ — ዕለታዊ ቆጠራ\n👤 ሰብሳቢ: ${rec.collectorName||'—'}\n📅 ${rec.ethDate} (${rec.date})\nአረጋውያን: ${rec.elderly} · አካል ጉዳተኞች: ${rec.disabled} · ሴቶች: ${rec.women} · ህጻናት: ${rec.children}\nገቢ — ዝቅተኛ:${rec.incomeLow} መካከለኛ:${rec.incomeMid} ከፍተኛ:${rec.incomeHigh}${jobText}${rec.notes ? '\n📝 '+rec.notes : ''}`);
+      showToast('ተመዝግቧል');
+    }
     ['so-elderly','so-disabled','so-women','so-children','so-income-low','so-income-mid','so-income-high'].forEach(id=> document.getElementById(id).value='');
+    document.getElementById('so-collector').value='';
     document.getElementById('so-notes').value='';
     document.getElementById('so-date').value = todayISO();
     jobTallyDraft = {};
     renderJobTallyList();
+    if(isEditing) cancelEdit();
   }catch(e){ console.error(e); showToast('ስህተት ተፈጥሯል፣ Firestore ያረጋግጡ'); }
 });
 
@@ -693,17 +729,77 @@ function renderHistTable(){
     }else{
       cells = [r.date, escapeAttr(r.collectorName||'—'), r.elderly, r.disabled, r.women, r.children, `${r.incomeLow||0}/${r.incomeMid||0}/${r.incomeHigh||0}`, escapeAttr(r.notes||'—')];
     }
-    return '<tr>' + cells.map(c=>`<td>${c}</td>`).join('') + `<td><button type="button" class="ghost small" data-del="${r.id}">ሰርዝ</button></td></tr>`;
+    return '<tr>' + cells.map(c=>`<td>${c}</td>`).join('') +
+      `<td style="white-space:nowrap;"><button type="button" class="ghost small" data-edit="${r.id}">አርትዕ</button> <button type="button" class="ghost small" data-del="${r.id}">ሰርዝ</button></td></tr>`;
   }).join('');
 }
 document.getElementById('hist-body').addEventListener('click', async (e)=>{
-  const btn = e.target.closest('[data-del]');
-  if(!btn) return;
-  if(!confirm('ይህን ምዝገባ መሰረዝ ይፈልጋሉ?')) return;
-  const coll = activeHistTab==='labor' ? 'labor_tally' : activeHistTab==='insurance' ? 'insurance_tally' : 'social_tally';
-  try{ await deleteDoc(doc(db,coll,btn.dataset.del)); showToast('ተሰርዟል'); }
-  catch(err){ console.error(err); showToast('መሰረዝ አልተቻለም'); }
+  const delBtn = e.target.closest('[data-del]');
+  const editBtn = e.target.closest('[data-edit]');
+  if(delBtn){
+    if(!confirm('ይህን ምዝገባ መሰረዝ ይፈልጋሉ?')) return;
+    const coll = activeHistTab==='labor' ? 'labor_tally' : activeHistTab==='insurance' ? 'insurance_tally' : 'social_tally';
+    try{ await deleteDoc(doc(db,coll,delBtn.dataset.del)); showToast('ተሰርዟል'); }
+    catch(err){ console.error(err); showToast('መሰረዝ አልተቻለም'); }
+  }
+  if(editBtn){
+    startEdit(activeHistTab, editBtn.dataset.edit);
+  }
 });
+
+function startEdit(dept, id){
+  const list = dept==='labor' ? laborEntries : dept==='insurance' ? insuranceEntries : socialEntries;
+  const r = list.find(x=>x.id===id);
+  if(!r) return;
+  editState = { dept, id };
+
+  document.querySelectorAll('.dept-tab').forEach(t=> t.classList.toggle('active', t.dataset.dept===dept));
+  document.getElementById('dept-labor').classList.toggle('hidden', dept!=='labor');
+  document.getElementById('dept-insurance').classList.toggle('hidden', dept!=='insurance');
+  document.getElementById('dept-social').classList.toggle('hidden', dept!=='social');
+
+  if(dept==='labor'){
+    document.getElementById('l-collector').value = r.collectorName||'';
+    document.getElementById('l-date').value = r.date||todayISO();
+    document.getElementById('l-unemp-m').value = r.unempMale||'';
+    document.getElementById('l-unemp-f').value = r.unempFemale||'';
+    document.getElementById('l-notes').value = r.notes||'';
+    document.getElementById('btn-save-labor').textContent = 'አዘምን';
+  }else if(dept==='insurance'){
+    document.getElementById('i-collector').value = r.collectorName||'';
+    document.getElementById('i-date').value = r.date||todayISO();
+    document.getElementById('i-new-m').value = r.newMale||'';
+    document.getElementById('i-new-f').value = r.newFemale||'';
+    document.getElementById('i-renew-m').value = r.renewMale||'';
+    document.getElementById('i-renew-f').value = r.renewFemale||'';
+    document.getElementById('i-notes').value = r.notes||'';
+    document.getElementById('btn-save-insurance').textContent = 'አዘምን';
+  }else{
+    document.getElementById('so-collector').value = r.collectorName||'';
+    document.getElementById('so-date').value = r.date||todayISO();
+    document.getElementById('so-elderly').value = r.elderly||'';
+    document.getElementById('so-disabled').value = r.disabled||'';
+    document.getElementById('so-women').value = r.women||'';
+    document.getElementById('so-children').value = r.children||'';
+    document.getElementById('so-income-low').value = r.incomeLow||'';
+    document.getElementById('so-income-mid').value = r.incomeMid||'';
+    document.getElementById('so-income-high').value = r.incomeHigh||'';
+    document.getElementById('so-notes').value = r.notes||'';
+    jobTallyDraft = {...(r.jobTypeCounts||{})};
+    renderJobTallyList();
+    document.getElementById('btn-save-social').textContent = 'አዘምን';
+  }
+  document.getElementById('admin-area').scrollIntoView({behavior:'smooth', block:'start'});
+  showToast('ማስተካከያ ላይ — ቀይረው "አዘምን" ይጫኑ');
+}
+
+function cancelEdit(){
+  editState = { dept:null, id:null };
+  document.getElementById('btn-save-labor').textContent = 'አስቀምጥ';
+  document.getElementById('btn-save-insurance').textContent = 'አስቀምጥ';
+  document.getElementById('btn-save-social').textContent = 'አስቀምጥ';
+}
 </script>
 </body>
+
 </html>
