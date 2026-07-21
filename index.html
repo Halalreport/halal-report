@@ -15,10 +15,14 @@
     --blue:#57B2E6; --blue-dim:rgba(87,178,230,0.14);
     --purple:#B78EE0; --purple-dim:rgba(183,142,224,0.14);
     --gold:#EFC565; --gold-dim:rgba(239,197,101,0.14);
+    --orange:#F2954A; --orange-dim:rgba(242,149,74,0.14);
     --red:#F0654A; --red-dim:rgba(240,101,74,0.14);
     --text:#F2F5F6; --text-2:#9BACB4; --text-3:#657379;
-    --line:rgba(255,255,255,0.09); --line-strong:rgba(255,255,255,0.16);
+    --line:rgba(255,255,255,0.09); --line-strong:rgba(255,255,255,0.16); --input-border:rgba(255,255,255,0.24);
     --hero-bg:#0C1013; --hero-card:rgba(30,38,43,0.6); --hero-blue:#42B884; --hero-text:#F2F5F6; --hero-text-2:#9BACB4;
+    --dept-labor:var(--blue); --dept-labor-dim:var(--blue-dim);
+    --dept-insurance:var(--teal); --dept-insurance-dim:var(--teal-dim);
+    --dept-social:var(--orange); --dept-social-dim:var(--orange-dim);
     --shadow-sm:0 1px 2px rgba(0,0,0,.35);
     --shadow-md:0 10px 28px -8px rgba(0,0,0,.5), 0 2px 8px -2px rgba(0,0,0,.4);
     --shadow-lg:0 24px 56px -16px rgba(0,0,0,.6), 0 4px 14px -4px rgba(0,0,0,.45);
@@ -32,9 +36,10 @@
     --blue:#1E7FB8; --blue-dim:rgba(30,127,184,0.10);
     --purple:#7C4FBF; --purple-dim:rgba(124,79,191,0.10);
     --gold:#B8860B; --gold-dim:rgba(184,134,11,0.10);
+    --orange:#C05F1D; --orange-dim:rgba(192,95,29,0.10);
     --red:#D93F1F; --red-dim:rgba(217,63,31,0.10);
     --text:#1A232C; --text-2:#4C5A66; --text-3:#7C8A94;
-    --line:rgba(15,30,45,0.08); --line-strong:rgba(15,30,45,0.16);
+    --line:rgba(15,30,45,0.08); --line-strong:rgba(15,30,45,0.16); --input-border:rgba(15,30,45,0.28);
     --hero-bg:#EEF2F7; --hero-card:rgba(255,255,255,0.78); --hero-blue:#1F8F5E; --hero-text:#1A232C; --hero-text-2:#4C5A66;
     --shadow-sm:0 1px 2px rgba(30,40,60,.06);
     --shadow-md:0 10px 28px -10px rgba(30,40,60,.16), 0 2px 8px -2px rgba(30,40,60,.08);
@@ -44,7 +49,7 @@
   *{box-sizing:border-box;}
   html{scroll-behavior:smooth;}
   body{
-    margin:0;color:var(--text);font-family:'Noto Sans Ethiopic',sans-serif;line-height:1.65;
+    margin:0;color:var(--text);font-family:'Noto Sans Ethiopic',sans-serif;font-size:15.5px;line-height:1.75;
     transition:background .3s var(--ease),color .3s var(--ease);
     background-color:var(--bg);
     background-image:
@@ -81,6 +86,13 @@
   .dept-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-md);border-color:var(--line-strong);}
   .dept-card:active{transform:translateY(-1px) scale(.99);}
   .dept-card.active{border-color:var(--hero-blue);box-shadow:var(--glow-teal);}
+  .dept-card[data-dept="labor"] .ic{filter:hue-rotate(0deg);}
+  .dept-card[data-dept="labor"].active{border-color:var(--dept-labor);box-shadow:0 0 0 1px var(--dept-labor-dim), 0 8px 24px -6px var(--dept-labor-dim);}
+  .dept-card[data-dept="labor"] .top{color:var(--dept-labor);}
+  .dept-card[data-dept="insurance"].active{border-color:var(--dept-insurance);box-shadow:0 0 0 1px var(--dept-insurance-dim), 0 8px 24px -6px var(--dept-insurance-dim);}
+  .dept-card[data-dept="insurance"] .top{color:var(--dept-insurance);}
+  .dept-card[data-dept="social"].active{border-color:var(--dept-social);box-shadow:0 0 0 1px var(--dept-social-dim), 0 8px 24px -6px var(--dept-social-dim);}
+  .dept-card[data-dept="social"] .top{color:var(--dept-social);}
   .dept-card .ic{font-size:27px;margin-bottom:9px;}
   .dept-card .lbl{font-size:13.5px;color:var(--hero-text);font-weight:600;line-height:1.35;}
   .dept-card .top{font-size:10.5px;color:var(--gold);margin-top:9px;font-family:'JetBrains Mono',monospace;}
@@ -97,17 +109,17 @@
     border:1px solid var(--line);border-radius:var(--radius-lg);padding:20px 22px;
     box-shadow:var(--shadow-sm);transition:box-shadow .25s var(--ease), border-color .25s var(--ease);
   }
-  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
-  .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;}
-  .grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;}
+  .grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
   .collector-row{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;margin-bottom:4px;padding:16px;background:var(--card);border:1px solid var(--line-strong);border-radius:var(--radius-md);}
   .collector-row .field{flex:1 1 130px;min-width:110px;margin-bottom:0;}
   .collector-row .field.wide{flex:1 1 170px;}
   .field{margin-bottom:15px;}
-  .field label{display:block;font-size:12px;font-weight:500;color:var(--text-2);margin-bottom:6px;letter-spacing:.01em;}
+  .field label{display:block;font-size:12.5px;font-weight:500;color:var(--text-2);margin-bottom:6px;letter-spacing:.01em;}
   input,select,textarea{
-    width:100%;background:var(--card);border:1px solid var(--line-strong);border-radius:var(--radius-sm);
-    color:var(--text);font-family:'Noto Sans Ethiopic',sans-serif;font-size:14px;padding:10px 11px;
+    width:100%;background:var(--card);border:1px solid var(--input-border);border-radius:var(--radius-sm);
+    color:var(--text);font-family:'Noto Sans Ethiopic',sans-serif;font-size:14.5px;line-height:1.5;padding:10px 11px;
     transition:border-color .18s var(--ease), box-shadow .18s var(--ease), background .18s var(--ease);
   }
   input.mono{font-family:'JetBrains Mono',monospace;}
@@ -116,8 +128,8 @@
   input::placeholder,textarea::placeholder{color:var(--text-3);}
 
   .readout{display:flex;gap:10px;flex-wrap:wrap;margin-top:4px;}
-  .readout .chip{flex:1;min-width:130px;background:var(--card);border:1px solid var(--line-strong);border-radius:var(--radius-md);padding:13px 15px;transition:transform .2s var(--ease), box-shadow .2s var(--ease);}
-  .readout .chip:hover{transform:translateY(-2px);box-shadow:var(--shadow-sm);}
+  .readout .chip{flex:1;min-width:130px;background:var(--card);border:1px solid var(--line-strong);border-radius:var(--radius-md);padding:13px 15px;transition:transform .2s var(--ease), box-shadow .2s var(--ease), border-color .2s var(--ease);cursor:default;}
+  .readout .chip:hover{transform:translateY(-3px) scale(1.02);box-shadow:var(--shadow-md);border-color:var(--line-strong);}
   .readout .chip .k{font-size:11px;color:var(--text-2);letter-spacing:.02em;}
   .readout .chip .v{font-family:'JetBrains Mono',monospace;font-size:21px;font-weight:700;margin-top:5px;letter-spacing:-.01em;}
   .readout .chip.teal .v{color:var(--teal);}
@@ -130,13 +142,16 @@
   button{
     font-family:'Noto Sans Ethiopic',sans-serif;font-size:13.5px;font-weight:500;border-radius:var(--radius-sm);padding:10px 18px;
     cursor:pointer;border:1px solid var(--line-strong);background:var(--card);color:var(--text);
+    display:inline-flex;align-items:center;justify-content:center;gap:6px;
     transition:transform .16s var(--ease), box-shadow .16s var(--ease), border-color .16s var(--ease), background .16s var(--ease);
   }
-  button:hover{border-color:var(--teal);transform:translateY(-1px);box-shadow:var(--shadow-sm);}
-  button:active{transform:translateY(0) scale(.97);}
+  button:hover{border-color:var(--teal);transform:translateY(-1px) scale(1.02);box-shadow:var(--shadow-sm);}
+  button:active{transform:translateY(0) scale(.95);}
   button.primary{background:var(--teal);color:#08201a;border-color:var(--teal);font-weight:600;}
   button.primary:hover{background:#54cf9a;box-shadow:var(--glow-teal);}
   button.ghost{background:transparent;border-color:var(--line);}
+  button.muted{background:var(--card);border-color:var(--line);color:var(--text-2);font-weight:500;}
+  button.muted:hover{border-color:var(--line-strong);color:var(--text);box-shadow:none;}
   button.small{padding:6px 12px;font-size:12px;}
   button:disabled{opacity:.5;cursor:not-allowed;transform:none !important;box-shadow:none !important;}
 
@@ -146,13 +161,17 @@
   .error-msg{color:var(--red);font-size:12.5px;margin-top:10px;display:none;}
 
   .dept-tabs{display:flex;gap:6px;margin-bottom:18px;flex-wrap:nowrap;}
-  .dept-tab{
+  .dept-tab,.hist-tab{
     flex:1;min-width:0;text-align:center;padding:10px 4px;border-radius:var(--radius-sm);border:1px solid var(--line-strong);
     cursor:pointer;font-size:11.5px;color:var(--text-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+    display:inline-flex;align-items:center;justify-content:center;gap:5px;
     transition:background .18s var(--ease), color .18s var(--ease), border-color .18s var(--ease), transform .18s var(--ease);
   }
-  .dept-tab:hover{color:var(--text);transform:translateY(-1px);}
-  .dept-tab.active{background:var(--teal-dim);color:var(--teal);border-color:var(--teal);font-weight:600;}
+  .dept-tab:hover,.hist-tab:hover{color:var(--text);transform:translateY(-1px);}
+  .dept-tab.active,.hist-tab.active{background:var(--teal-dim);color:var(--teal);border-color:var(--teal);font-weight:600;}
+  .dept-tab.active[data-dept="labor"],.hist-tab.active[data-hist="labor"]{background:var(--dept-labor-dim);color:var(--dept-labor);border-color:var(--dept-labor);}
+  .dept-tab.active[data-dept="insurance"],.hist-tab.active[data-hist="insurance"]{background:var(--dept-insurance-dim);color:var(--dept-insurance);border-color:var(--dept-insurance);}
+  .dept-tab.active[data-dept="social"],.hist-tab.active[data-hist="social"]{background:var(--dept-social-dim);color:var(--dept-social);border-color:var(--dept-social);}
 
   .job-add-row{display:flex;gap:8px;align-items:flex-end;}
   .job-add-row .field{margin-bottom:0;flex:1;}
@@ -167,8 +186,12 @@
   th{text-align:left;padding:9px 8px;color:var(--text-2);border-bottom:1px solid var(--line-strong);font-weight:600;font-size:11.5px;letter-spacing:.02em;}
   td{padding:10px 8px;border-bottom:1px solid var(--line);}
   tr{transition:background .15s var(--ease);}
-  tr:hover td{background:rgba(255,255,255,0.035);}
-  .empty{text-align:center;padding:32px 20px;color:var(--text-3);border:1px dashed var(--line-strong);border-radius:var(--radius-md);font-size:13px;}
+  tbody tr:nth-child(even) td{background:rgba(255,255,255,0.018);}
+  body[data-theme="light"] tbody tr:nth-child(even) td{background:rgba(15,30,45,0.02);}
+  tr:hover td{background:rgba(255,255,255,0.06) !important;}
+  body[data-theme="light"] tr:hover td{background:rgba(15,30,45,0.045) !important;}
+  .empty{text-align:center;padding:38px 20px;color:var(--text-3);border:1px dashed var(--line-strong);border-radius:var(--radius-md);font-size:13px;}
+  .empty::before{content:"🗂️";display:block;font-size:30px;margin-bottom:10px;opacity:.6;}
   .rank-item{display:flex;justify-content:space-between;align-items:center;background:var(--card);border:1px solid var(--line-strong);border-radius:var(--radius-sm);padding:10px 14px;margin-bottom:6px;font-size:13px;transition:transform .15s var(--ease), box-shadow .15s var(--ease);}
   .rank-item:hover{transform:translateY(-1px);box-shadow:var(--shadow-sm);}
   .rank-item .pos{font-family:'JetBrains Mono',monospace;color:var(--gold);font-weight:700;width:26px;}
@@ -204,6 +227,7 @@
   .admin-tab{
     flex:1;text-align:center;padding:12px 6px;border-radius:7px;cursor:pointer;font-size:12.5px;font-weight:600;
     color:var(--text-2);border-bottom:3px solid transparent;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+    display:inline-flex;align-items:center;justify-content:center;gap:6px;
     transition:background .2s var(--ease),color .2s var(--ease),border-color .2s var(--ease);
   }
   .admin-tab:hover{color:var(--text);}
@@ -235,15 +259,26 @@
   .profile-card{display:flex;flex-direction:column;gap:6px;}
 
   .toast{
-    position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(8px);
+    position:fixed;bottom:20px;right:20px;
     background:var(--teal);color:#08201a;padding:12px 22px;border-radius:var(--radius-md);font-size:13px;font-weight:600;
-    display:none;z-index:50;box-shadow:var(--shadow-lg);opacity:0;
+    display:none;z-index:50;box-shadow:var(--shadow-lg);opacity:0;max-width:calc(100% - 40px);
     transition:opacity .25s var(--ease), transform .25s var(--ease);
+    transform:translateY(8px);
   }
-  .toast.show{display:block;opacity:1;transform:translateX(-50%) translateY(0);}
+  .toast.show{display:block;opacity:1;transform:translateY(0);}
+  @media(max-width:640px){
+    .toast{right:14px;bottom:14px;font-size:12.5px;padding:11px 16px;}
+  }
 
   @media(max-width:900px){
     .grid3{grid-template-columns:1fr 1fr;}
+    .grid4{grid-template-columns:1fr 1fr;}
+  }
+  @media(min-width:641px){
+    .hist-table-wrap, .rank-table-wrap{max-height:520px;overflow-y:auto;}
+  }
+  .hist-table-wrap thead th, .rank-table-wrap thead th{
+    position:sticky;top:0;background:var(--panel);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);z-index:2;
   }
   @media(max-width:640px){
     .admin-tab span{display:none;}
@@ -270,6 +305,46 @@
     }
     .dept-card{min-width:100px;}
   }
+
+  /* ---- Skeleton loaders ---- */
+  .skeleton-line{
+    color:transparent !important; border-radius:4px; display:inline-block; min-width:40px;
+    background:linear-gradient(90deg, var(--line) 25%, var(--line-strong) 50%, var(--line) 75%);
+    background-size:200% 100%; animation:shimmer 1.4s ease-in-out infinite;
+  }
+  @keyframes shimmer{0%{background-position:200% 0;}100%{background-position:-200% 0;}}
+
+  /* ---- Floating batch summary bar ---- */
+  .batch-summary-bar{
+    position:fixed;left:50%;bottom:18px;transform:translateX(-50%);
+    display:flex;align-items:center;gap:16px;
+    background:var(--panel);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
+    border:1px solid var(--line-strong);border-radius:999px;padding:11px 12px 11px 20px;
+    box-shadow:var(--shadow-lg);z-index:40;max-width:calc(100% - 32px);
+    transition:opacity .25s var(--ease), transform .25s var(--ease);
+  }
+  .batch-summary-bar.hidden{display:none;}
+  .batch-summary-bar .bs-text{font-size:13px;color:var(--text);white-space:nowrap;}
+  .batch-summary-bar .bs-text b{color:var(--teal);font-family:'JetBrains Mono',monospace;}
+  .batch-summary-bar button{white-space:nowrap;}
+  @media(max-width:640px){
+    .batch-summary-bar{padding:10px 10px 10px 16px;gap:10px;}
+    .batch-summary-bar .bs-text{font-size:12px;}
+  }
+
+  /* ---- Print-friendly ---- */
+  @media print{
+    .top-bar, .hero .dept-cards, .hero-underline, #lock-screen, .admin-tabs, .dept-tabs,
+    .form-actions, .filter-bar, .job-add-row, .batch-table-wrap, .batch-add-actions,
+    .batch-summary-bar, .toast, #edit-box-labor, #edit-box-insurance, #edit-box-social,
+    button, .session-bar, #admin-panel-entry, #admin-panel-settings { display:none !important; }
+    body{background:#fff !important;color:#000 !important;}
+    body::before{display:none;}
+    .card{box-shadow:none !important;border:1px solid #ccc !important;backdrop-filter:none !important;background:#fff !important;}
+    table{font-size:11px;}
+    th,td{color:#000 !important;border-color:#ccc !important;}
+    .hist-table-wrap, .rank-table-wrap{overflow:visible !important;}
+  }
 </style>
 </head>
 <body id="body-root">
@@ -286,17 +361,17 @@
   <h1 data-i18n="heroTitle">ዕለታዊ መረጃዎች መመዝገቢያ</h1>
   <p data-i18n="heroSubtitle">የስራ ሂደቶችን መረጃ በጥራትና በፍጥነት መመዝገቢያ ማዕከል</p>
   <div class="dept-cards">
-    <div class="dept-card" data-panel="labor-panel">
+    <div class="dept-card" data-panel="labor-panel" data-dept="labor">
       <div class="ic">💼</div>
       <div class="lbl" data-i18n="deptLabor">ስራና ክህሎት</div>
       <div class="top" id="top-labor"></div>
     </div>
-    <div class="dept-card" data-panel="insurance-panel">
+    <div class="dept-card" data-panel="insurance-panel" data-dept="insurance">
       <div class="ic">🏥</div>
       <div class="lbl" data-i18n="deptInsurance">ጤና መድን</div>
       <div class="top" id="top-insurance"></div>
     </div>
-    <div class="dept-card" data-panel="social-panel">
+    <div class="dept-card" data-panel="social-panel" data-dept="social">
       <div class="ic">👥</div>
       <div class="lbl" data-i18n="deptSocial">ማህበራዊ ጉዳይ</div>
       <div class="top" id="top-social"></div>
@@ -370,7 +445,7 @@
 
       <div class="session-bar" style="display:flex;justify-content:space-between;align-items:center;background:var(--panel);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid var(--line);border-radius:var(--radius-md);padding:12px 18px;margin-bottom:18px;box-shadow:var(--shadow-sm);">
         <span style="font-size:12.5px;color:var(--teal);" data-i18n="adminIn">🔓 አድሚን ገብተዋል</span>
-        <button type="button" class="ghost small" id="btn-admin-logout" data-i18n="logout">ውጣ</button>
+        <button type="button" class="muted small" id="btn-admin-logout" data-i18n="logout">ውጣ</button>
       </div>
 
       <div class="admin-tabs">
@@ -408,7 +483,7 @@
               <textarea id="l-notes" data-i18n-placeholder="notesPh" placeholder="ማንኛውም ማስታወሻ..."></textarea>
             </div>
             <div class="form-actions">
-              <button type="button" class="ghost" id="btn-cancel-edit-labor" data-i18n="cancelBtn">ይቅር</button>
+              <button type="button" class="muted" id="btn-cancel-edit-labor" data-i18n="cancelBtn">ይቅር</button>
               <button type="button" class="primary" id="btn-save-labor" data-i18n="updateBtn">አዘምን</button>
             </div>
           </div>
@@ -453,7 +528,7 @@
               <textarea id="i-notes" data-i18n-placeholder="notesPh" placeholder="ማንኛውም ማስታወሻ..."></textarea>
             </div>
             <div class="form-actions">
-              <button type="button" class="ghost" id="btn-cancel-edit-insurance" data-i18n="cancelBtn">ይቅር</button>
+              <button type="button" class="muted" id="btn-cancel-edit-insurance" data-i18n="cancelBtn">ይቅር</button>
               <button type="button" class="primary" id="btn-save-insurance" data-i18n="updateBtn">አዘምን</button>
             </div>
           </div>
@@ -529,7 +604,7 @@
               <textarea id="so-notes" data-i18n-placeholder="notesPh" placeholder="ማንኛውም ማስታወሻ..."></textarea>
             </div>
             <div class="form-actions">
-              <button type="button" class="ghost" id="btn-cancel-edit-social" data-i18n="cancelBtn">ይቅር</button>
+              <button type="button" class="muted" id="btn-cancel-edit-social" data-i18n="cancelBtn">ይቅር</button>
               <button type="button" class="primary" id="btn-save-social" data-i18n="updateBtn">አዘምን</button>
             </div>
           </div>
@@ -642,7 +717,7 @@
             <label data-i18n="filterSearch">ፈልግ (ስም/ቀበሌ/ወረዳ/ዞን)</label>
             <input type="text" id="filt-search" data-i18n-placeholder="filterSearchPh" placeholder="ስም ወይም ቦታ ይጻፉ...">
           </div>
-          <button type="button" class="ghost small" id="btn-clear-filter" data-i18n="filterClear">✕ አጽዳ</button>
+          <button type="button" class="muted small" id="btn-clear-filter" data-i18n="filterClear">✕ አጽዳ</button>
         </div>
 
         <div class="form-actions" style="justify-content:flex-start;">
@@ -660,6 +735,11 @@
     </div>
 
   </div>
+</div>
+
+<div class="batch-summary-bar hidden" id="batch-summary-bar">
+  <span class="bs-text" id="batch-summary-text">0 ረድፍ ዝግጁ</span>
+  <button type="button" class="primary small" id="batch-summary-save">✅ አስቀምጥ</button>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -903,6 +983,15 @@ function populateJobSelect(){
 populateJobSelect();
 applyI18n();
 
+// ---- Skeleton loaders (until first Firestore snapshot arrives) ----
+document.querySelectorAll('.readout .v').forEach(el=> el.classList.add('skeleton-line'));
+['rank-labor','rank-insurance','rank-social'].forEach(id=>{
+  document.getElementById(id).innerHTML =
+    `<div class="skeleton-line" style="height:14px;width:75%;margin-bottom:9px;"></div>
+     <div class="skeleton-line" style="height:14px;width:55%;margin-bottom:9px;"></div>
+     <div class="skeleton-line" style="height:14px;width:65%;"></div>`;
+});
+
 // ---- Hero cards toggle stat panels ----
 document.querySelectorAll('.dept-card').forEach(card=>{
   card.addEventListener('click', ()=>{
@@ -930,6 +1019,7 @@ document.getElementById('btn-unlock').addEventListener('click', ()=>{
     document.getElementById('admin-area').classList.remove('hidden');
     err.style.display='none';
     renderHistTable();
+    updateBatchSummaryBar();
   }else{
     err.textContent = currentLang==='en' ? 'Incorrect username or code' : 'የተሳሳተ የተጠቃሚ ስም ወይም ኮድ'; err.style.display='block';
   }
@@ -944,6 +1034,7 @@ document.getElementById('btn-admin-logout').addEventListener('click', ()=>{
   document.getElementById('admin-pass').value = '';
   document.getElementById('admin-user').value = '';
   cancelEdit();
+  updateBatchSummaryBar();
 });
 document.getElementById('btn-change-code').addEventListener('click', ()=>{
   const c1 = document.getElementById('new-admin-code').value;
@@ -1003,6 +1094,7 @@ document.querySelectorAll('.admin-tab').forEach(tab=>{
     document.getElementById('admin-panel-history').classList.toggle('hidden', target!=='history');
     document.getElementById('admin-panel-settings').classList.toggle('hidden', target!=='settings');
     if(target==='history') renderHistTable();
+    updateBatchSummaryBar();
   });
 });
 
@@ -1099,6 +1191,7 @@ function renderBatchRows(dept){
   const wrap = document.getElementById(`batch-${dept}`);
   if(!wrap) return;
   wrap.innerHTML = batchRows[dept].map((row,idx)=> batchRowHtml(dept,row,idx)).join('');
+  updateBatchSummaryBar();
 }
 ['labor','insurance','social'].forEach(dept=>{
   renderBatchRows(dept);
@@ -1107,11 +1200,13 @@ function renderBatchRows(dept){
     const t = e.target;
     if(t.dataset.idx===undefined || !t.dataset.field) return;
     batchRows[dept][Number(t.dataset.idx)][t.dataset.field] = t.value;
+    updateBatchSummaryBar();
   });
   wrap.addEventListener('change', (e)=>{
     const t = e.target;
     if(t.dataset.idx===undefined || !t.dataset.field) return;
     batchRows[dept][Number(t.dataset.idx)][t.dataset.field] = t.value;
+    updateBatchSummaryBar();
   });
   wrap.addEventListener('click', (e)=>{
     const btn = e.target.closest('[data-batch-rm]');
@@ -1134,6 +1229,35 @@ function batchRowHasData(dept, row){
   if(dept==='insurance') return (Number(row.newMale)||0)+(Number(row.newFemale)||0)+(Number(row.renewMale)||0)+(Number(row.renewFemale)||0) > 0;
   return (Number(row.elderly)||0)+(Number(row.disabled)||0)+(Number(row.women)||0)+(Number(row.children)||0)+(Number(row.jobCount)||0)+(Number(row.incomeLow)||0)+(Number(row.incomeMid)||0)+(Number(row.incomeHigh)||0) > 0;
 }
+
+// ---- Floating batch summary bar ----
+function currentEntryDept(){
+  const activeTab = document.querySelector('.dept-tab.active');
+  return activeTab ? activeTab.dataset.dept : 'labor';
+}
+function updateBatchSummaryBar(){
+  const bar = document.getElementById('batch-summary-bar');
+  const entryVisible = adminUnlocked && !document.getElementById('admin-panel-entry').classList.contains('hidden');
+  const dept = currentEntryDept();
+  const isEditing = editState.dept === dept && editState.id;
+  if(!entryVisible || isEditing){
+    bar.classList.add('hidden');
+    return;
+  }
+  const rows = (batchRows[dept]||[]).filter(r=> batchRowHasData(dept, r));
+  if(rows.length === 0){
+    bar.classList.add('hidden');
+    return;
+  }
+  bar.classList.remove('hidden');
+  document.getElementById('batch-summary-text').innerHTML =
+    `<b>${rows.length}</b> ${currentLang==='en' ? (rows.length>1?'entries ready to save':'entry ready to save') : 'ምዝገባ ለመላክ ዝግጁ ናቸው'}`;
+  bar.dataset.activeDept = dept;
+}
+document.getElementById('batch-summary-save').addEventListener('click', ()=>{
+  const dept = document.getElementById('batch-summary-bar').dataset.activeDept;
+  if(dept) document.getElementById(`btn-save-batch-${dept}`).click();
+});
 
 document.getElementById('btn-save-batch-labor').addEventListener('click', async ()=>{
   const rows = batchRows.labor.filter(r=> batchRowHasData('labor', r));
@@ -1230,6 +1354,7 @@ document.querySelectorAll('.dept-tab').forEach(tab=>{
     document.getElementById('dept-labor').classList.toggle('hidden', tab.dataset.dept!=='labor');
     document.getElementById('dept-insurance').classList.toggle('hidden', tab.dataset.dept!=='insurance');
     document.getElementById('dept-social').classList.toggle('hidden', tab.dataset.dept!=='social');
+    updateBatchSummaryBar();
   });
 });
 
@@ -1260,6 +1385,7 @@ onSnapshot(query(collection(db,'social_tally')), (snap)=>{
 function sumField(arr, field){ return arr.reduce((s,r)=> s + (Number(r[field])||0), 0); }
 
 function renderStats(){
+  document.querySelectorAll('.readout .v.skeleton-line').forEach(el=> el.classList.remove('skeleton-line'));
   const unempM = sumField(laborEntries,'unempMale');
   const unempF = sumField(laborEntries,'unempFemale');
   document.getElementById('s-unemp-m').textContent = unempM;
@@ -1650,6 +1776,7 @@ function startEdit(dept, id){
   }
   document.getElementById(`edit-box-${dept}`).scrollIntoView({behavior:'smooth', block:'start'});
   showToast(currentLang==='en'?'Editing — change values then click Update':'ማስተካከያ ላይ — ቀይረው "አዘምን" ይጫኑ');
+  updateBatchSummaryBar();
 }
 
 function cancelEdit(){
@@ -1658,6 +1785,7 @@ function cancelEdit(){
     document.getElementById(`edit-box-${d}`).classList.add('hidden');
     document.getElementById(`batch-area-${d}`).classList.remove('hidden');
   });
+  updateBatchSummaryBar();
 }
 
 // ---- CSV export ----
